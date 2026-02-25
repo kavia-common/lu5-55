@@ -5,3 +5,4 @@ test.lua
 
 examples/models/*.obj
 !examples/models/ship.obj
+.file_activity_report.json
