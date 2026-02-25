@@ -1,0 +1,55 @@
+DeltaAPI.txt
+===========
+
+NOTE:
+This file did not exist in the current repository snapshot at the time of this change.
+It has been created as a placeholder to capture requested API additions.
+
+----------------------------------------------------------------------
+REQUESTED: Additional API functions to add (placeholder)
+----------------------------------------------------------------------
+
+The user request says: "Add some API function in 'DeltaAPI.txt'", but does not
+specify the exact function names/signatures to add.
+
+Please provide the exact API function list in the following format for each
+function so it can be added precisely and consistently:
+
+- Name:
+- Signature:
+- Category/Module (e.g., window, shapes, math, io, image, typography, keyboard, mouse, vector, transform, camera):
+- Since version (if applicable):
+- Description (1-3 lines):
+- Parameters:
+  - <paramName>: <type> - <description>
+- Returns:
+  - <type> - <description>
+- Example usage (Lua snippet):
+
+----------------------------------------------------------------------
+PLACEHOLDER ENTRIES (to be replaced once function names are provided)
+----------------------------------------------------------------------
+
+1) Name: <FUNCTION_NAME_1>
+   Signature: <FUNCTION_NAME_1>(<args>)
+   Category/Module: <CATEGORY>
+   Since version: <VERSION_OR_LATEST>
+   Description: <SHORT_DESCRIPTION>
+   Parameters:
+     - <arg1>: <type> - <description>
+   Returns:
+     - <type> - <description>
+   Example:
+     -- <example code>
+
+2) Name: <FUNCTION_NAME_2>
+   Signature: <FUNCTION_NAME_2>(<args>)
+   Category/Module: <CATEGORY>
+   Since version: <VERSION_OR_LATEST>
+   Description: <SHORT_DESCRIPTION>
+   Parameters:
+     - <arg1>: <type> - <description>
+   Returns:
+     - <type> - <description>
+   Example:
+     -- <example code>
