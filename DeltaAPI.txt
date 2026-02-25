@@ -1,55 +1,1594 @@
 DeltaAPI.txt
 ===========
 
-NOTE:
-This file did not exist in the current repository snapshot at the time of this change.
-It has been created as a placeholder to capture requested API additions.
+Purpose
+-------
+This file captures a proposed "p5-style" API surface for lu5.
 
-----------------------------------------------------------------------
-REQUESTED: Additional API functions to add (placeholder)
-----------------------------------------------------------------------
+- It is intended as a planning/delta document (not a guarantee of implementation).
+- It is organized using the same module/category language used by the documentation site
+  (`docs/latest/modules.json`), plus additional p5-style modules that are common in p5.js.
+- Each entry is marked as:
+  - [EXISTS]   : present in current lu5 docs (docs/latest/modules.json)
+  - [PROPOSED] : planned / desired API addition
+  - [PARTIAL]  : exists in some form, but incomplete or missing common p5 behaviors
 
-The user request says: "Add some API function in 'DeltaAPI.txt'", but does not
-specify the exact function names/signatures to add.
-
-Please provide the exact API function list in the following format for each
-function so it can be added precisely and consistently:
+Conventions
+-----------
+For each symbol:
 
 - Name:
 - Signature:
-- Category/Module (e.g., window, shapes, math, io, image, typography, keyboard, mouse, vector, transform, camera):
-- Since version (if applicable):
-- Description (1-3 lines):
+- Category/Module:
+- Status: [EXISTS] | [PROPOSED] | [PARTIAL]
+- Description:
 - Parameters:
-  - <paramName>: <type> - <description>
 - Returns:
-  - <type> - <description>
-- Example usage (Lua snippet):
+- Notes:
 
 ----------------------------------------------------------------------
-PLACEHOLDER ENTRIES (to be replaced once function names are provided)
+BASE / SKETCH LIFECYCLE
 ----------------------------------------------------------------------
 
-1) Name: <FUNCTION_NAME_1>
-   Signature: <FUNCTION_NAME_1>(<args>)
-   Category/Module: <CATEGORY>
-   Since version: <VERSION_OR_LATEST>
-   Description: <SHORT_DESCRIPTION>
+1) Name: setup
+   Signature: setup()
+   Category/Module: lifecycle
+   Status: [PROPOSED]
+   Description: Called once before draw loop starts. Initialize sketch state here.
    Parameters:
-     - <arg1>: <type> - <description>
+     - (none)
    Returns:
-     - <type> - <description>
-   Example:
-     -- <example code>
+     - nil - no return value
+   Notes:
+     - lu5 already supports `function setup()` in examples; documenting it here as part of API surface.
 
-2) Name: <FUNCTION_NAME_2>
-   Signature: <FUNCTION_NAME_2>(<args>)
-   Category/Module: <CATEGORY>
-   Since version: <VERSION_OR_LATEST>
-   Description: <SHORT_DESCRIPTION>
+2) Name: draw
+   Signature: draw()
+   Category/Module: lifecycle
+   Status: [PROPOSED]
+   Description: Called repeatedly once per frame while looping is enabled.
    Parameters:
-     - <arg1>: <type> - <description>
+     - (none)
    Returns:
-     - <type> - <description>
-   Example:
-     -- <example code>
+     - nil - no return value
+   Notes:
+     - lu5 already supports `function draw()` in examples; documenting it here as part of API surface.
+
+3) Name: preload
+   Signature: preload()
+   Category/Module: lifecycle
+   Status: [PROPOSED]
+   Description: Called once before setup. Intended for synchronous asset loading.
+   Parameters:
+     - (none)
+   Returns:
+     - nil - no return value
+   Notes:
+     - In p5.js, preload ensures assets are ready before setup. lu5 currently has loadImage/loadFont;
+       adding preload as a convention would improve parity.
+
+----------------------------------------------------------------------
+WINDOW / RUNTIME CONTROL
+----------------------------------------------------------------------
+
+1) Name: createWindow
+   Signature: createWindow(width, height, opts?)
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Create the main window and graphics context.
+   Parameters:
+     - width: number - window width in pixels
+     - height: number - window height in pixels
+     - opts?: table - optional settings (title, resizable, vsync, etc.)
+   Returns:
+     - nil - no return value
+   Notes:
+     - opts is proposed as a richer p5-style extension (currently likely only width/height).
+
+2) Name: width
+   Signature: width
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Current window width in pixels.
+   Parameters:
+     - (none)
+   Returns:
+     - number - width in pixels
+   Notes:
+     - Typically exposed as a global number (not a function).
+
+3) Name: height
+   Signature: height
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Current window height in pixels.
+   Parameters:
+     - (none)
+   Returns:
+     - number - height in pixels
+   Notes:
+     - Typically exposed as a global number (not a function).
+
+4) Name: frameRate
+   Signature: frameRate(fps?)
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Set (or get) the target framerate.
+   Parameters:
+     - fps?: number - desired frames per second
+   Returns:
+     - number|nil - if called without args, returns current target fps (proposed)
+   Notes:
+     - Returning current fps when no args is proposed for p5 parity.
+
+5) Name: deltaTime
+   Signature: deltaTime
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Elapsed time in milliseconds since last frame.
+   Parameters:
+     - (none)
+   Returns:
+     - number - milliseconds
+   Notes:
+     - Typically exposed as a global number (not a function).
+
+6) Name: windowResized
+   Signature: windowResized()
+   Category/Module: window
+   Status: [EXISTS]
+   Description: Event callback fired when window is resized.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+   Notes:
+     - p5 has windowResized callback. lu5 docs include it.
+
+7) Name: loop
+   Signature: loop()
+   Category/Module: window
+   Status: [PROPOSED]
+   Description: Resume calling draw() in a loop.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+   Notes:
+     - Present in some versions of lu5 docs historically; not in docs/latest/modules.json.
+
+8) Name: noLoop
+   Signature: noLoop()
+   Category/Module: window
+   Status: [PROPOSED]
+   Description: Stop calling draw() repeatedly; draw can still be invoked manually (see redraw()).
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+9) Name: redraw
+   Signature: redraw(n?)
+   Category/Module: window
+   Status: [PROPOSED]
+   Description: Execute draw() one time (or n times) when looping is stopped.
+   Parameters:
+     - n?: number - number of redraws
+   Returns:
+     - nil
+
+10) Name: saveWindow
+    Signature: saveWindow(path?)
+    Category/Module: window
+    Status: [PROPOSED]
+    Description: Save a screenshot of the current frame.
+    Parameters:
+      - path?: string - destination path (default: timestamp-based filename)
+    Returns:
+      - string|nil - saved path (proposed)
+    Notes:
+      - Mentioned in older docs versions; not in latest module list.
+
+----------------------------------------------------------------------
+SETTINGS / STATE (STYLE + RENDER STATE STACK)
+----------------------------------------------------------------------
+
+1) Name: background
+   Signature: background(r, g?, b?, a?)
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Clear the screen with a color.
+   Parameters:
+     - r: number|string - red channel (0-255) or named color string
+     - g?: number - green channel
+     - b?: number - blue channel
+     - a?: number - alpha
+   Returns:
+     - nil
+   Notes:
+     - Support for named colors exists in examples/docs; keep parity with current behavior.
+
+2) Name: fill
+   Signature: fill(r, g?, b?, a?)
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Set fill color for shapes.
+   Parameters:
+     - r: number|string
+     - g?: number
+     - b?: number
+     - a?: number
+   Returns:
+     - nil
+
+3) Name: noFill
+   Signature: noFill()
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Disable filling geometry.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+4) Name: stroke
+   Signature: stroke(r, g?, b?, a?)
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Set stroke (outline) color for shapes/lines.
+   Parameters:
+     - r: number|string
+     - g?: number
+     - b?: number
+     - a?: number
+   Returns:
+     - nil
+
+5) Name: noStroke
+   Signature: noStroke()
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Disable stroke drawing.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+6) Name: strokeWeight
+   Signature: strokeWeight(weight)
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Set stroke width in pixels.
+   Parameters:
+     - weight: number - stroke width
+   Returns:
+     - nil
+
+7) Name: push
+   Signature: push()
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Push current style + transform state onto stack.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+8) Name: pop
+   Signature: pop()
+   Category/Module: setting
+   Status: [EXISTS]
+   Description: Pop style + transform state from stack.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+9) Name: rectMode
+   Signature: rectMode(mode)
+   Category/Module: setting
+   Status: [PROPOSED]
+   Description: Set rect drawing mode (CORNER, CORNERS, CENTER, RADIUS).
+   Parameters:
+     - mode: string|number - mode constant
+   Returns:
+     - nil
+
+10) Name: ellipseMode
+    Signature: ellipseMode(mode)
+    Category/Module: setting
+    Status: [PROPOSED]
+    Description: Set ellipse drawing mode (CENTER, RADIUS, CORNER, CORNERS).
+    Parameters:
+      - mode: string|number
+    Returns:
+      - nil
+
+11) Name: imageMode
+    Signature: imageMode(mode)
+    Category/Module: setting
+    Status: [PROPOSED]
+    Description: Set image draw mode (CORNER, CENTER).
+    Parameters:
+      - mode: string|number
+    Returns:
+      - nil
+
+12) Name: angleMode
+    Signature: angleMode(mode)
+    Category/Module: math
+    Status: [PROPOSED]
+    Description: Set angle measurement mode (RADIANS or DEGREES) for trig/rotate helpers.
+    Parameters:
+      - mode: string|number
+    Returns:
+      - nil
+    Notes:
+      - lu5 currently exposes sin/cos/tan; if radians-only today, angleMode provides p5-like toggle.
+
+13) Name: debugMode
+    Signature: debugMode(enabled?)
+    Category/Module: setting
+    Status: [EXISTS]
+    Description: Enable/disable debug visuals (axes, bounding boxes, etc.).
+    Parameters:
+      - enabled?: boolean - set debug mode
+    Returns:
+      - boolean|nil - return current state when called without args (proposed)
+
+----------------------------------------------------------------------
+2D SHAPES
+----------------------------------------------------------------------
+
+1) Name: point
+   Signature: point(x, y)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a point.
+   Parameters:
+     - x: number
+     - y: number
+   Returns:
+     - nil
+
+2) Name: line
+   Signature: line(x1, y1, x2, y2)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a line segment.
+   Parameters:
+     - x1: number
+     - y1: number
+     - x2: number
+     - y2: number
+   Returns:
+     - nil
+
+3) Name: rect
+   Signature: rect(x, y, w, h, tl?, tr?, br?, bl?)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a rectangle, optionally with rounded corners.
+   Parameters:
+     - x: number
+     - y: number
+     - w: number
+     - h: number
+     - tl?: number - top-left radius
+     - tr?: number - top-right radius
+     - br?: number - bottom-right radius
+     - bl?: number - bottom-left radius
+   Returns:
+     - nil
+
+4) Name: square
+   Signature: square(x, y, s)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a square.
+   Parameters:
+     - x: number
+     - y: number
+     - s: number
+   Returns:
+     - nil
+
+5) Name: ellipse
+   Signature: ellipse(x, y, w, h)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw an ellipse.
+   Parameters:
+     - x: number
+     - y: number
+     - w: number
+     - h: number
+   Returns:
+     - nil
+
+6) Name: circle
+   Signature: circle(x, y, d)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a circle.
+   Parameters:
+     - x: number
+     - y: number
+     - d: number - diameter
+   Returns:
+     - nil
+
+7) Name: arc
+   Signature: arc(x, y, w, h, start, stop, mode?)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw an arc.
+   Parameters:
+     - x: number
+     - y: number
+     - w: number
+     - h: number
+     - start: number - start angle
+     - stop: number - stop angle
+     - mode?: string|number - OPEN, CHORD, PIE
+   Returns:
+     - nil
+
+8) Name: triangle
+   Signature: triangle(x1, y1, x2, y2, x3, y3)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a triangle.
+   Parameters:
+     - x1: number
+     - y1: number
+     - x2: number
+     - y2: number
+     - x3: number
+     - y3: number
+   Returns:
+     - nil
+   Notes:
+     - Roadmap notes mention some stroke support gaps for triangle/quad in some versions.
+
+9) Name: quad
+   Signature: quad(x1, y1, x2, y2, x3, y3, x4, y4)
+   Category/Module: shapes
+   Status: [EXISTS]
+   Description: Draw a quadrilateral.
+   Parameters:
+     - x1: number
+     - y1: number
+     - x2: number
+     - y2: number
+     - x3: number
+     - y3: number
+     - x4: number
+     - y4: number
+   Returns:
+     - nil
+
+10) Name: beginShape
+    Signature: beginShape(kind?)
+    Category/Module: shapes
+    Status: [EXISTS]
+    Description: Begin a custom shape.
+    Parameters:
+      - kind?: string|number - POINTS, LINES, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN, QUADS (optional)
+    Returns:
+      - nil
+
+11) Name: vertex
+    Signature: vertex(x, y, z?)
+    Category/Module: shapes
+    Status: [EXISTS]
+    Description: Add a vertex to the current shape.
+    Parameters:
+      - x: number
+      - y: number
+      - z?: number - optional for 3D
+    Returns:
+      - nil
+
+12) Name: endShape
+    Signature: endShape(close?)
+    Category/Module: shapes
+    Status: [EXISTS]
+    Description: Finish a custom shape.
+    Parameters:
+      - close?: boolean|string|number - CLOSE to close the shape
+    Returns:
+      - nil
+
+13) Name: bezier
+    Signature: bezier(x1, y1, cx1, cy1, cx2, cy2, x2, y2)
+    Category/Module: shapes
+    Status: [PROPOSED]
+    Description: Draw a cubic Bézier curve.
+    Parameters:
+      - x1,y1: number - start point
+      - cx1,cy1: number - first control point
+      - cx2,cy2: number - second control point
+      - x2,y2: number - end point
+    Returns:
+      - nil
+
+14) Name: bezierPoint
+    Signature: bezierPoint(a, b, c, d, t)
+    Category/Module: math
+    Status: [PROPOSED]
+    Description: Compute a point on a Bézier curve at parameter t.
+    Parameters:
+      - a,b,c,d: number - curve points
+      - t: number - 0..1
+    Returns:
+      - number - interpolated value
+
+15) Name: bezierTangent
+    Signature: bezierTangent(a, b, c, d, t)
+    Category/Module: math
+    Status: [PROPOSED]
+    Description: Compute tangent on a Bézier curve at t.
+    Parameters:
+      - a,b,c,d: number
+      - t: number
+    Returns:
+      - number
+
+16) Name: curve
+    Signature: curve(x1, y1, x2, y2, x3, y3, x4, y4)
+    Category/Module: shapes
+    Status: [PROPOSED]
+    Description: Draw a Catmull-Rom spline segment (p5-style curve()).
+    Parameters:
+      - x1,y1: number - previous point
+      - x2,y2: number - start point
+      - x3,y3: number - end point
+      - x4,y4: number - next point
+    Returns:
+      - nil
+
+----------------------------------------------------------------------
+3D SHAPES
+----------------------------------------------------------------------
+
+1) Name: box
+   Signature: box(w, h?, d?)
+   Category/Module: shapes3D
+   Status: [EXISTS]
+   Description: Draw a 3D box.
+   Parameters:
+     - w: number
+     - h?: number
+     - d?: number
+   Returns:
+     - nil
+
+2) Name: sphere
+   Signature: sphere(r, detailX?, detailY?)
+   Category/Module: shapes3D
+   Status: [EXISTS]
+   Description: Draw a 3D sphere.
+   Parameters:
+     - r: number
+     - detailX?: number
+     - detailY?: number
+   Returns:
+     - nil
+
+3) Name: plane
+   Signature: plane(w, h?)
+   Category/Module: shapes3D
+   Status: [EXISTS]
+   Description: Draw a 3D plane.
+   Parameters:
+     - w: number
+     - h?: number
+   Returns:
+     - nil
+
+4) Name: cylinder
+   Signature: cylinder(r, h, detailX?, detailY?, bottomCap?, topCap?)
+   Category/Module: shapes3D
+   Status: [PROPOSED]
+   Description: Draw a 3D cylinder (p5-like).
+   Parameters:
+     - r: number
+     - h: number
+     - detailX?: number
+     - detailY?: number
+     - bottomCap?: boolean
+     - topCap?: boolean
+   Returns:
+     - nil
+
+5) Name: torus
+   Signature: torus(r, tubeRadius, detailX?, detailY?)
+   Category/Module: shapes3D
+   Status: [PROPOSED]
+   Description: Draw a 3D torus (p5-like).
+   Parameters:
+     - r: number
+     - tubeRadius: number
+     - detailX?: number
+     - detailY?: number
+   Returns:
+     - nil
+
+6) Name: cone
+   Signature: cone(r, h, detailX?, detailY?, cap?)
+   Category/Module: shapes3D
+   Status: [PROPOSED]
+   Description: Draw a 3D cone (p5-like).
+   Parameters:
+     - r: number
+     - h: number
+     - detailX?: number
+     - detailY?: number
+     - cap?: boolean
+   Returns:
+     - nil
+
+----------------------------------------------------------------------
+TRANSFORM (2D/3D)
+----------------------------------------------------------------------
+
+1) Name: translate
+   Signature: translate(x, y, z?)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Translate the coordinate system.
+   Parameters:
+     - x: number
+     - y: number
+     - z?: number
+   Returns:
+     - nil
+
+2) Name: rotate
+   Signature: rotate(angle)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Rotate around Z axis (2D rotation).
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+3) Name: rotateX
+   Signature: rotateX(angle)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Rotate around X axis.
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+4) Name: rotateY
+   Signature: rotateY(angle)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Rotate around Y axis.
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+5) Name: rotateZ
+   Signature: rotateZ(angle)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Rotate around Z axis (3D rotation).
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+6) Name: scale
+   Signature: scale(x, y?, z?)
+   Category/Module: transform
+   Status: [EXISTS]
+   Description: Scale the coordinate system.
+   Parameters:
+     - x: number
+     - y?: number
+     - z?: number
+   Returns:
+     - nil
+
+7) Name: shearX
+   Signature: shearX(angle)
+   Category/Module: transform
+   Status: [PROPOSED]
+   Description: Shear transform along X axis (2D).
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+8) Name: shearY
+   Signature: shearY(angle)
+   Category/Module: transform
+   Status: [PROPOSED]
+   Description: Shear transform along Y axis (2D).
+   Parameters:
+     - angle: number
+   Returns:
+     - nil
+
+----------------------------------------------------------------------
+CAMERA / CONTROLS
+----------------------------------------------------------------------
+
+1) Name: orbitControl
+   Signature: orbitControl(sensitivityX?, sensitivityY?, sensitivityZ?)
+   Category/Module: camera
+   Status: [EXISTS]
+   Description: Enable orbit (mouse) camera control.
+   Parameters:
+     - sensitivityX?: number
+     - sensitivityY?: number
+     - sensitivityZ?: number
+   Returns:
+     - nil
+
+2) Name: camera
+   Signature: camera(x?, y?, z?, centerX?, centerY?, centerZ?, upX?, upY?, upZ?)
+   Category/Module: camera
+   Status: [PROPOSED]
+   Description: Set camera position/orientation.
+   Parameters:
+     - x?,y?,z?: number - eye position
+     - centerX?,centerY?,centerZ?: number - look-at target
+     - upX?,upY?,upZ?: number - up vector
+   Returns:
+     - nil
+
+3) Name: perspective
+   Signature: perspective(fovy?, aspect?, near?, far?)
+   Category/Module: camera
+   Status: [PROPOSED]
+   Description: Set perspective projection parameters.
+   Parameters:
+     - fovy?: number
+     - aspect?: number
+     - near?: number
+     - far?: number
+   Returns:
+     - nil
+
+4) Name: ortho
+   Signature: ortho(left?, right?, bottom?, top?, near?, far?)
+   Category/Module: camera
+   Status: [PROPOSED]
+   Description: Set orthographic projection.
+   Parameters:
+     - left?,right?,bottom?,top?,near?,far?: number
+   Returns:
+     - nil
+
+----------------------------------------------------------------------
+TYPOGRAPHY
+----------------------------------------------------------------------
+
+1) Name: loadFont
+   Signature: loadFont(path, size?)
+   Category/Module: typography
+   Status: [EXISTS]
+   Description: Load a font from disk.
+   Parameters:
+     - path: string
+     - size?: number - default size
+   Returns:
+     - Font - font object/handle
+   Notes:
+     - Return type naming is illustrative; actual lu5 may use userdata.
+
+2) Name: textFont
+   Signature: textFont(font)
+   Category/Module: typography
+   Status: [EXISTS]
+   Description: Set current font.
+   Parameters:
+     - font: Font
+   Returns:
+     - nil
+
+3) Name: textSize
+   Signature: textSize(size)
+   Category/Module: typography
+   Status: [EXISTS]
+   Description: Set current text size.
+   Parameters:
+     - size: number
+   Returns:
+     - nil
+
+4) Name: text
+   Signature: text(str, x, y, z?)
+   Category/Module: typography
+   Status: [EXISTS]
+   Description: Draw text at a position.
+   Parameters:
+     - str: string
+     - x: number
+     - y: number
+     - z?: number
+   Returns:
+     - nil
+
+5) Name: textAlign
+   Signature: textAlign(hAlign, vAlign?)
+   Category/Module: typography
+   Status: [PROPOSED]
+   Description: Set text horizontal/vertical alignment (LEFT/CENTER/RIGHT, TOP/CENTER/BOTTOM/BASELINE).
+   Parameters:
+     - hAlign: string|number
+     - vAlign?: string|number
+   Returns:
+     - nil
+
+6) Name: textWidth
+   Signature: textWidth(str)
+   Category/Module: typography
+   Status: [PROPOSED]
+   Description: Measure rendered width of a string with current font settings.
+   Parameters:
+     - str: string
+   Returns:
+     - number - width in pixels
+
+----------------------------------------------------------------------
+IMAGE
+----------------------------------------------------------------------
+
+1) Name: loadImage
+   Signature: loadImage(path)
+   Category/Module: image
+   Status: [EXISTS]
+   Description: Load an image from disk.
+   Parameters:
+     - path: string
+   Returns:
+     - Image - image object/handle
+
+2) Name: image
+   Signature: image(img, x, y, w?, h?)
+   Category/Module: image
+   Status: [EXISTS]
+   Description: Draw an image.
+   Parameters:
+     - img: Image
+     - x: number
+     - y: number
+     - w?: number
+     - h?: number
+   Returns:
+     - nil
+
+3) Name: Image.crop
+   Signature: Image:crop(x, y, w, h)
+   Category/Module: image
+   Status: [EXISTS]
+   Description: Crop an image to a sub-rectangle.
+   Parameters:
+     - x: number
+     - y: number
+     - w: number
+     - h: number
+   Returns:
+     - Image - new cropped image
+
+4) Name: saveImage
+   Signature: saveImage(path)
+   Category/Module: image
+   Status: [PROPOSED]
+   Description: Save an image or current framebuffer to disk.
+   Parameters:
+     - path: string
+   Returns:
+     - boolean - success
+
+5) Name: createImage
+   Signature: createImage(w, h)
+   Category/Module: image
+   Status: [PROPOSED]
+   Description: Create a blank image.
+   Parameters:
+     - w: number
+     - h: number
+   Returns:
+     - Image
+
+6) Name: tint
+   Signature: tint(r, g?, b?, a?)
+   Category/Module: image
+   Status: [PROPOSED]
+   Description: Apply a tint color when drawing images.
+   Parameters:
+     - r: number|string
+     - g?: number
+     - b?: number
+     - a?: number
+   Returns:
+     - nil
+
+7) Name: noTint
+   Signature: noTint()
+   Category/Module: image
+   Status: [PROPOSED]
+   Description: Disable image tinting.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+----------------------------------------------------------------------
+MODELS (3D)
+----------------------------------------------------------------------
+
+1) Name: loadModel
+   Signature: loadModel(path)
+   Category/Module: models
+   Status: [EXISTS]
+   Description: Load a 3D model from disk.
+   Parameters:
+     - path: string
+   Returns:
+     - Model - model object/handle
+
+2) Name: model
+   Signature: model(m)
+   Category/Module: models
+   Status: [EXISTS]
+   Description: Draw a loaded 3D model.
+   Parameters:
+     - m: Model
+   Returns:
+     - nil
+
+----------------------------------------------------------------------
+INPUT: MOUSE
+----------------------------------------------------------------------
+
+1) Name: mouseX
+   Signature: mouseX
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Current mouse X position.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+2) Name: mouseY
+   Signature: mouseY
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Current mouse Y position.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+3) Name: pmouseX
+   Signature: pmouseX
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Previous frame mouse X position.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+4) Name: pmouseY
+   Signature: pmouseY
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Previous frame mouse Y position.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+5) Name: mouseIsPressed
+   Signature: mouseIsPressed
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: True when any mouse button is pressed.
+   Parameters:
+     - (none)
+   Returns:
+     - boolean
+
+6) Name: mousePressed
+   Signature: mousePressed()
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Event callback fired when a mouse button is pressed.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+7) Name: mouseReleased
+   Signature: mouseReleased()
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Event callback fired when a mouse button is released.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+8) Name: mouseWheel
+   Signature: mouseWheel(delta)
+   Category/Module: mouse
+   Status: [EXISTS]
+   Description: Event callback fired on mouse wheel.
+   Parameters:
+     - delta: number - wheel delta
+   Returns:
+     - nil
+
+9) Name: mouseButton
+   Signature: mouseButton
+   Category/Module: mouse
+   Status: [PROPOSED]
+   Description: Which mouse button is currently pressed (LEFT/CENTER/RIGHT).
+   Parameters:
+     - (none)
+   Returns:
+     - string|number
+
+----------------------------------------------------------------------
+INPUT: KEYBOARD
+----------------------------------------------------------------------
+
+1) Name: keyIsDown
+   Signature: keyIsDown(key)
+   Category/Module: keyboard
+   Status: [EXISTS]
+   Description: Returns true if key is currently pressed.
+   Parameters:
+     - key: string|number - key identifier or keycode constant
+   Returns:
+     - boolean
+
+2) Name: keyHeld
+   Signature: keyHeld()
+   Category/Module: keyboard
+   Status: [EXISTS]
+   Description: Event callback fired repeatedly while a key is held down.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+3) Name: keyPressed
+   Signature: keyPressed()
+   Category/Module: keyboard
+   Status: [EXISTS]
+   Description: Event callback fired when a key is pressed.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+4) Name: keyReleased
+   Signature: keyReleased()
+   Category/Module: keyboard
+   Status: [EXISTS]
+   Description: Event callback fired when a key is released.
+   Parameters:
+     - (none)
+   Returns:
+     - nil
+
+5) Name: key
+   Signature: key
+   Category/Module: keyboard
+   Status: [PROPOSED]
+   Description: Last key pressed as a string (p5-style).
+   Parameters:
+     - (none)
+   Returns:
+     - string
+
+6) Name: keyCode
+   Signature: keyCode
+   Category/Module: keyboard
+   Status: [PROPOSED]
+   Description: Last key pressed as a keycode constant (p5-style).
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+----------------------------------------------------------------------
+IO / LOADERS
+----------------------------------------------------------------------
+
+1) Name: print
+   Signature: print(...)
+   Category/Module: io
+   Status: [EXISTS]
+   Description: Print values to console/log.
+   Parameters:
+     - ...: any - any number of values
+   Returns:
+     - nil
+
+2) Name: loadText
+   Signature: loadText(path)
+   Category/Module: io
+   Status: [EXISTS]
+   Description: Load a text file into a string.
+   Parameters:
+     - path: string
+   Returns:
+     - string
+
+3) Name: loadStrings
+   Signature: loadStrings(path)
+   Category/Module: io
+   Status: [EXISTS]
+   Description: Load a text file into an array of lines.
+   Parameters:
+     - path: string
+   Returns:
+     - table<string> - array of lines
+
+4) Name: saveStrings
+   Signature: saveStrings(path, lines)
+   Category/Module: io
+   Status: [PROPOSED]
+   Description: Save an array of strings to a file.
+   Parameters:
+     - path: string
+     - lines: table<string>
+   Returns:
+     - boolean
+
+5) Name: saveText
+   Signature: saveText(path, text)
+   Category/Module: io
+   Status: [PROPOSED]
+   Description: Save a string to a file.
+   Parameters:
+     - path: string
+     - text: string
+   Returns:
+     - boolean
+
+----------------------------------------------------------------------
+MATH (NUMERIC HELPERS + CONSTANTS)
+----------------------------------------------------------------------
+
+1) Name: PI
+   Signature: PI
+   Category/Module: math
+   Status: [PROPOSED]
+   Description: Pi constant.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+2) Name: TWO_PI
+   Signature: TWO_PI
+   Category/Module: math
+   Status: [PROPOSED]
+   Description: Two pi constant.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+3) Name: HALF_PI
+   Signature: HALF_PI
+   Category/Module: math
+   Status: [PROPOSED]
+   Description: Half pi constant.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+4) Name: QUARTER_PI
+   Signature: QUARTER_PI
+   Category/Module: math
+   Status: [PROPOSED]
+   Description: Quarter pi constant.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+5) Name: abs
+   Signature: abs(x)
+   Category/Module: math
+   Status: [EXISTS]
+   Description: Absolute value.
+   Parameters:
+     - x: number
+   Returns:
+     - number
+
+6) Name: ceil
+   Signature: ceil(x)
+   Category/Module: math
+   Status: [EXISTS]
+   Description: Round up.
+   Parameters:
+     - x: number
+   Returns:
+     - number
+
+7) Name: floor
+   Signature: floor(x)
+   Category/Module: math
+   Status: [EXISTS]
+   Description: Round down.
+   Parameters:
+     - x: number
+   Returns:
+     - number
+
+8) Name: round
+   Signature: round(x)
+   Category/Module: math
+   Status: [EXISTS]
+   Description: Round to nearest integer.
+   Parameters:
+     - x: number
+   Returns:
+     - number
+
+9) Name: min
+   Signature: min(a, b, ...)
+   Category/Module: math
+   Status: [EXISTS]
+   Description: Minimum of values.
+   Parameters:
+     - a: number
+     - b: number
+     - ...: number
+   Returns:
+     - number
+
+10) Name: max
+    Signature: max(a, b, ...)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Maximum of values.
+    Parameters:
+      - a: number
+      - b: number
+      - ...: number
+    Returns:
+      - number
+
+11) Name: constrain
+    Signature: constrain(n, low, high)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Clamp a value to [low, high].
+    Parameters:
+      - n: number
+      - low: number
+      - high: number
+    Returns:
+      - number
+
+12) Name: map
+    Signature: map(value, start1, stop1, start2, stop2, withinBounds?)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Re-map a number from one range to another.
+    Parameters:
+      - value: number
+      - start1: number
+      - stop1: number
+      - start2: number
+      - stop2: number
+      - withinBounds?: boolean
+    Returns:
+      - number
+
+13) Name: dist
+    Signature: dist(x1, y1, x2, y2)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Distance between two points (2D).
+    Parameters:
+      - x1: number
+      - y1: number
+      - x2: number
+      - y2: number
+    Returns:
+      - number
+    Notes:
+      - Present in docs/latest/modules.json as math.dist.
+
+14) Name: sin
+    Signature: sin(angle)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Sine of angle.
+    Parameters:
+      - angle: number
+    Returns:
+      - number
+
+15) Name: cos
+    Signature: cos(angle)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Cosine of angle.
+    Parameters:
+      - angle: number
+    Returns:
+      - number
+
+16) Name: tan
+    Signature: tan(angle)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Tangent of angle.
+    Parameters:
+      - angle: number
+    Returns:
+      - number
+
+17) Name: random
+    Signature: random(min?, max?)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Random number helper.
+    Parameters:
+      - min?: number
+      - max?: number
+    Returns:
+      - number
+
+18) Name: randomSeed
+    Signature: randomSeed(seed)
+    Category/Module: math
+    Status: [EXISTS]
+    Description: Set random seed.
+    Parameters:
+      - seed: number
+    Returns:
+      - nil
+
+19) Name: lerp
+    Signature: lerp(start, stop, amt)
+    Category/Module: math
+    Status: [PROPOSED]
+    Description: Linear interpolation.
+    Parameters:
+      - start: number
+      - stop: number
+      - amt: number - 0..1
+    Returns:
+      - number
+
+20) Name: norm
+    Signature: norm(value, start, stop)
+    Category/Module: math
+    Status: [PROPOSED]
+    Description: Normalize a value to 0..1 in a range.
+    Parameters:
+      - value: number
+      - start: number
+      - stop: number
+    Returns:
+      - number
+
+----------------------------------------------------------------------
+VECTOR
+----------------------------------------------------------------------
+
+1) Name: createVector
+   Signature: createVector(x?, y?, z?)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Create a vector object.
+   Parameters:
+     - x?: number
+     - y?: number
+     - z?: number
+   Returns:
+     - Vector
+
+2) Name: Vector
+   Signature: Vector(x?, y?, z?)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Vector class/constructor.
+   Parameters:
+     - x?: number
+     - y?: number
+     - z?: number
+   Returns:
+     - Vector
+
+3) Name: Vector.copy
+   Signature: v:copy()
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Copy a vector.
+   Parameters:
+     - (none)
+   Returns:
+     - Vector
+
+4) Name: Vector.add
+   Signature: v:add(other)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Add another vector.
+   Parameters:
+     - other: Vector
+   Returns:
+     - Vector|nil - (implementation dependent; propose returning self for chaining)
+
+5) Name: Vector.sub
+   Signature: v:sub(other)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Subtract another vector.
+   Parameters:
+     - other: Vector
+   Returns:
+     - Vector|nil
+
+6) Name: Vector.mult
+   Signature: v:mult(n)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Multiply by scalar.
+   Parameters:
+     - n: number
+   Returns:
+     - Vector|nil
+
+7) Name: Vector.div
+   Signature: v:div(n)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Divide by scalar.
+   Parameters:
+     - n: number
+   Returns:
+     - Vector|nil
+
+8) Name: Vector.idiv
+   Signature: v:idiv(n)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Integer divide by scalar (floor division).
+   Parameters:
+     - n: number
+   Returns:
+     - Vector|nil
+
+9) Name: Vector.dot
+   Signature: v:dot(other)
+   Category/Module: vector
+   Status: [EXISTS]
+   Description: Dot product.
+   Parameters:
+     - other: Vector
+   Returns:
+     - number
+
+10) Name: Vector.dist
+    Signature: v:dist(other)
+    Category/Module: vector
+    Status: [EXISTS]
+    Description: Distance to another vector.
+    Parameters:
+      - other: Vector
+    Returns:
+      - number
+
+11) Name: Vector.print
+    Signature: v:print()
+    Category/Module: vector
+    Status: [EXISTS]
+    Description: Print vector to console/log.
+    Parameters:
+      - (none)
+    Returns:
+      - nil
+
+12) Name: Vector.mag
+    Signature: v:mag()
+    Category/Module: vector
+    Status: [PROPOSED]
+    Description: Magnitude (length) of vector.
+    Parameters:
+      - (none)
+    Returns:
+      - number
+
+13) Name: Vector.normalize
+    Signature: v:normalize()
+    Category/Module: vector
+    Status: [PROPOSED]
+    Description: Normalize the vector to length 1.
+    Parameters:
+      - (none)
+    Returns:
+      - Vector|nil
+
+----------------------------------------------------------------------
+CLASSES
+----------------------------------------------------------------------
+
+1) Name: class
+   Signature: class(nameOrTable, super?)
+   Category/Module: classes
+   Status: [EXISTS]
+   Description: Simple class helper/utility.
+   Parameters:
+     - nameOrTable: string|table
+     - super?: table
+   Returns:
+     - table - class table
+
+----------------------------------------------------------------------
+COLOR (p5-style parity)
+----------------------------------------------------------------------
+
+1) Name: color
+   Signature: color(r, g?, b?, a?)
+   Category/Module: color
+   Status: [PROPOSED]
+   Description: Construct a color object.
+   Parameters:
+     - r: number|string
+     - g?: number
+     - b?: number
+     - a?: number
+   Returns:
+     - Color - color object/handle
+
+2) Name: lerpColor
+   Signature: lerpColor(c1, c2, amt)
+   Category/Module: color
+   Status: [PROPOSED]
+   Description: Interpolate between two colors.
+   Parameters:
+     - c1: Color
+     - c2: Color
+     - amt: number - 0..1
+   Returns:
+     - Color
+
+----------------------------------------------------------------------
+TIME / DATE (p5-style parity)
+----------------------------------------------------------------------
+
+1) Name: millis
+   Signature: millis()
+   Category/Module: time
+   Status: [PROPOSED]
+   Description: Milliseconds since sketch started.
+   Parameters:
+     - (none)
+   Returns:
+     - number
+
+----------------------------------------------------------------------
+END
+----------------------------------------------------------------------
+
+This is a proposed API surface list.
+
+Next steps (implementation-oriented, not part of the API list):
+- Use this document to prioritize features and generate missing documentation stubs.
+- Keep this file in sync with docs/latest/modules.json as features land.

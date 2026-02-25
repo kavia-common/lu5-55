@@ -77,6 +77,13 @@ for other distributions, you might want to [build from source](./BUILD.md).
 
 See [lu5's roadmap](./ROADMAP.md)
 
+### API surface (proposed)
+
+The published API reference lives on the documentation site (see link at the top of this README).
+For ongoing expansion and p5-style parity planning, see:
+
+- `DeltaAPI.txt` — proposed/target API surface (marked [EXISTS] vs [PROPOSED]) used to track additions before they land in the generated docs.
+
 
 ### Contributions
 
